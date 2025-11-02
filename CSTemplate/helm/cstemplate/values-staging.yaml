@@ -1,0 +1,114 @@
+# Staging environment values for cstemplate
+# Override default values for staging deployments
+
+replicaCount: 2
+
+image:
+  repository: your-registry.azurecr.io/cstemplate-api
+  pullPolicy: Always
+  tag: "staging-latest"
+
+imagePullSecrets:
+  - name: acr-secret
+
+podAnnotations:
+  environment: staging
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+
+podLabels:
+  environment: staging
+  version: staging
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  hosts:
+    - host: cstemplate-staging.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: cstemplate-staging-tls
+      hosts:
+        - cstemplate-staging.yourdomain.com
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Application configuration for staging
+app:
+  environment: Staging
+  aspnetcoreUrls: "http://+:8080"
+  logLevel: Information
+
+# Database configuration for staging
+database:
+  host: postgres-staging.database.svc.cluster.local
+  port: 5432
+  name: weatherdb_staging
+  username: postgres
+  passwordSecret:
+    name: postgres-staging-secret
+    key: password
+
+# PostgreSQL configuration for staging
+postgresql:
+  enabled: true
+  auth:
+    username: postgres
+    database: weatherdb_staging
+    existingSecret: postgres-staging-secret
+  primary:
+    persistence:
+      enabled: true
+      size: 20Gi
+      storageClass: managed-premium
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+# Node affinity for staging - prefer specific node pool
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+            - key: agentpool
+              operator: In
+              values:
+                - staging
+

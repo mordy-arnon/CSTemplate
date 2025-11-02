@@ -1,0 +1,13 @@
+apiVersion: v2
+name: cstemplate
+description: A Helm chart for CSTemplate Weather API
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - weather
+  - api
+  - dotnet
+maintainers:
+  - name: CSTemplate Team
+

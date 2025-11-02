@@ -1,0 +1,125 @@
+# Default values for cstemplate
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: cstemplate-api
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: cstemplate.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: cstemplate-tls
+  #    hosts:
+  #      - cstemplate.local
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /weatherforecast
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /weatherforecast
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+volumes: []
+volumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Application configuration
+app:
+  environment: Production
+  aspnetcoreUrls: "http://+:8080"
+  
+# Database configuration
+database:
+  host: postgres-service
+  port: 5432
+  name: weatherdb
+  username: postgres
+  # Password should be provided via secret
+  passwordSecret:
+    name: postgres-secret
+    key: password
+
+# PostgreSQL subchart
+postgresql:
+  enabled: true
+  auth:
+    username: postgres
+    database: weatherdb
+    existingSecret: postgres-secret
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+
