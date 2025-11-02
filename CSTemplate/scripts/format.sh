@@ -4,7 +4,7 @@
 
 set -e
 
-MODE="${1:---fix}"
+MODE="${1:check}"
 
 echo "====================================="
 echo "  Running Code Formatter"
@@ -13,16 +13,15 @@ echo ""
 
 if [ "$MODE" == "--fix" ]; then
     echo "[1/1] Formatting code..."
-    dotnet format --verbosity diagnostic
+    dotnet format CSTemplate.sln
     
     echo ""
     echo "====================================="
     echo "  ✓ Code formatted successfully"
     echo "====================================="
-elif [ "$MODE" == "--check" ]; then
+else
     echo "[1/1] Checking code format..."
-    
-    if dotnet format --verify-no-changes --verbosity diagnostic; then
+    if dotnet format CSTemplate.sln --verify-no-changes; then
         echo ""
         echo "====================================="
         echo "  ✓ Format check PASSED"

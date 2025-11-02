@@ -15,13 +15,9 @@ public class WeatherForecastController(ILogger<WeatherForecastController> logger
     private readonly HttpClient _httpClient = httpClient;
     private const string OpenMeteoApiUrl = "https://api.open-meteo.com/v1/forecast?latitude=20.5&longitude=-13.4&current=temperature_2m";
 
-    [HttpGet(Name =    "GetWeatherForecast")]
-    public async Task<ActionResult<IEnumerable<WeatherForecast>>>    Get()
+    [HttpGet(Name = "GetWeatherForecast")]
+    public async Task<ActionResult<IEnumerable<WeatherForecast>>> Get()
     {
-
-
-
-        
         try
         {
             // Get all summaries from the database
