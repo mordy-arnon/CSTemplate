@@ -27,13 +27,11 @@ mkdir -p "$REPORT_PATH"
 # Run tests with coverage
 echo "[3/4] Running tests with coverage..."
 dotnet test \
-    --configuration Release \
-    --collect:"XPlat Code Coverage" \
-    --results-directory "$REPORT_PATH/raw" \
-    --logger "console;verbosity=normal" \
-    /p:CollectCoverage=true \
-    /p:CoverletOutputFormat=cobertura \
-    /p:CoverletOutput="$REPORT_PATH/"
+  --configuration Release \
+  --collect:"XPlat Code Coverage" \
+  --results-directory "$REPORT_PATH/raw" \
+  --logger "console;verbosity=normal"
+
 
 # Generate HTML report
 echo "[4/4] Generating coverage report..."
@@ -57,7 +55,7 @@ if [ -f "$COVERAGE_FILE" ]; then
         COVERAGE=$(grep "Line coverage:" "$REPORT_PATH/html/Summary.txt" | grep -oP '\d+\.?\d*(?=%)')
         
         echo ""
-        if (( $(echo "$COVERAGE >= $MIN_COVERAGE" | bc -l) )); then
+        if awk "BEGIN {exit !($COVERAGE >= $MIN_COVERAGE)}"; then
             echo "✓ Coverage check PASSED: $COVERAGE% >= $MIN_COVERAGE%"
             echo "  HTML Report: $REPORT_PATH/html/index.html"
             exit 0
@@ -66,6 +64,7 @@ if [ -f "$COVERAGE_FILE" ]; then
             echo "  HTML Report: $REPORT_PATH/html/index.html"
             exit 1
         fi
+
     fi
 fi
 

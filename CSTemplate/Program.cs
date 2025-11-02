@@ -39,7 +39,7 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    
+
     // Enable Swagger UI
     app.UseSwaggerUI(options =>
     {
